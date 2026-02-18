@@ -10,8 +10,13 @@ const Alerts = () => {
     useEffect(() => {
         const fetchAlerts = async () => {
             try {
-                const data = await alertService.getAlerts();
-                const sortedData = [...data].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                const response = await alertService.getAlerts();
+                const data = Array.isArray(response) ? response : (response?.items || []);
+                const sortedData = [...data].sort((a, b) => {
+                    const dateA = new Date(a.timestamp);
+                    const dateB = new Date(b.timestamp);
+                    return dateB - dateA;
+                });
                 setAlerts(sortedData);
                 setError(null);
             } catch (err) {

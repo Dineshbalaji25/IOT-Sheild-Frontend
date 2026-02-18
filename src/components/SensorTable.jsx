@@ -23,7 +23,7 @@ const SensorTable = ({ data }) => {
                 <tbody>
                     {data.map((item, index) => (
                         <tr key={item.id || index}>
-                            <td>{new Date(item.timestamp).toLocaleString()}</td>
+                            <td>{new Date(item.received_at || item.timestamp).toLocaleString()}</td>
                             <td>{item.device_id}</td>
                             <td>{item.temperature?.toFixed(2)}</td>
                             <td>{item.humidity?.toFixed(2)}</td>

@@ -21,11 +21,15 @@ const AlertTable = ({ alerts }) => {
                 <tbody>
                     {alerts.map((alert, index) => (
                         <tr key={alert.id || index}>
-                            <td>{new Date(alert.timestamp).toLocaleString()}</td>
+                            <td>{new Date(alert.alert_created_at || alert.message_timestamp || alert.received_at || alert.timestamp).toLocaleString()}</td>
                             <td>{alert.device_id}</td>
                             <td>{alert.topic}</td>
                             <td className="text-danger">
-                                {alert.violated_parameters.join(', ')}
+                                {Array.isArray(alert.violated_parameters)
+                                    ? alert.violated_parameters.join(', ')
+                                    : (typeof alert.violated_parameters === 'string'
+                                        ? alert.violated_parameters
+                                        : 'Violation')}
                             </td>
                             <td>
                                 <pre className="json-values">

@@ -22,14 +22,30 @@ const Dashboard = () => {
 
     const fetchData = useCallback(async () => {
         try {
-            const [latest, dashboardStats, alerts] = await Promise.all([
+            const [latestResponse, statsResponse, alertsResponse] = await Promise.all([
                 sensorService.getLatestSensors(),
                 sensorService.getStats(),
                 alertService.getAlerts()
             ]);
+
+            // Normalize data to use 'timestamp' consistently
+            const latest = (Array.isArray(latestResponse) ? latestResponse : (latestResponse?.items || [])).map(item => ({
+                ...item,
+                timestamp: item.received_at || item.timestamp || new Date().toISOString()
+            }));
+
+            const alerts = (Array.isArray(alertsResponse) ? alertsResponse : (alertsResponse?.items || [])).map(item => ({
+                ...item,
+                timestamp: item.alert_created_at || item.message_timestamp || item.received_at || item.timestamp || new Date().toISOString()
+            }));
+
             setLatestData(latest);
-            setStats(dashboardStats);
-            setRecentAlerts(alerts.slice(0, 5)); // Show 5 most recent
+            setStats({
+                total_messages: statsResponse?.total_messages ?? 0,
+                total_alerts: statsResponse?.total_alerts ?? 0,
+                active_devices: statsResponse?.active_devices ?? 0
+            });
+            setRecentAlerts(alerts.slice(0, 5));
             setError(null);
         } catch (err) {
             console.error('Error fetching dashboard data:', err);
@@ -49,6 +65,10 @@ const Dashboard = () => {
         return <div className="spinner"></div>;
     }
 
+    const lastSyncTime = latestData.length > 0
+        ? new Date(latestData[0].timestamp).toLocaleTimeString()
+        : new Date().toLocaleTimeString(); // Fallback to current time if no data yet
+
     return (
         <div className="container">
             <header className="dashboard-header">
@@ -58,10 +78,10 @@ const Dashboard = () => {
             </header>
 
             <div className="grid grid-cols-4">
-                <StatCard title="Total Messages" value={stats.total_messages.toLocaleString()} color="var(--primary-color)" />
-                <StatCard title="Total Alerts" value={stats.total_alerts.toLocaleString()} color="var(--danger-color)" />
-                <StatCard title="Active Devices" value={stats.active_devices} color="var(--success-color)" />
-                <StatCard title="Last Sync" value={new Date().toLocaleTimeString()} color="var(--warning-color)" />
+                <StatCard title="Total Messages" value={(stats.total_messages || 0).toLocaleString()} color="var(--primary-color)" />
+                <StatCard title="Total Alerts" value={(stats.total_alerts || 0).toLocaleString()} color="var(--danger-color)" />
+                <StatCard title="Active Devices" value={stats.active_devices || 0} color="var(--success-color)" />
+                <StatCard title="Last Sync" value={lastSyncTime} color="var(--warning-color)" />
             </div>
 
             <div className="dashboard-charts grid mt-2">
@@ -160,7 +180,13 @@ const Dashboard = () => {
                                     <li key={idx} className="alert-item-mini">
                                         <span className="alert-badge text-danger">Alert</span>
                                         <span className="alert-device">{alert.device_id}</span>
-                                        <span className="alert-param">{alert.violated_parameters ? alert.violated_parameters.join(', ') : 'Violation'}</span>
+                                        <span className="alert-param">
+                                            {Array.isArray(alert.violated_parameters)
+                                                ? alert.violated_parameters.join(', ')
+                                                : (typeof alert.violated_parameters === 'string'
+                                                    ? alert.violated_parameters
+                                                    : 'Violation')}
+                                        </span>
                                         <span className="alert-time">{new Date(alert.timestamp).toLocaleTimeString()}</span>
                                     </li>
                                 ))}
