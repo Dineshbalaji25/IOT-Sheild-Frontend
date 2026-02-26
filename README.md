@@ -1,16 +1,48 @@
-# React + Vite
+# IOT Shield Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the frontend dashboard for the IOT Shield Monitoring Platform, built with React, Vite, and Recharts. It provides real-time visualization of telemetry data from connected IoT devices.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Real-Time Dashboard**: Displays live stats like total messages, alerts, and active devices.
+- **Charts**: Visualizes temperature, humidity, and voltage data using Recharts.
+- **Alert Monitoring**: Shows a feed of recent alerts triggered by violated sensor thresholds.
 
-## React Compiler
+## Requirements
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js (version 18 or higher recommended)
+- npm or yarn
 
-## Expanding the ESLint configuration
+## Setup and Execution Steps
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. **Install Dependencies**
+
+   Open a terminal in the `IOT-Sheild-frontend` directory and run:
+
+   ```bash
+   npm install
+   ```
+
+2. **Environment Variables**
+
+   Ensure you have a `.env` file in the root of the frontend project:
+
+   ```env
+   VITE_API_URL=/api
+   ```
+
+   *(Note: The `/api` proxy is configured in `vite.config.js` to route traffic to the backend at `http://localhost:8000` to prevent CORS issues.)*
+
+3. **Start the Development Server**
+
+   ```bash
+   npm run dev
+   ```
+
+4. **Access the Application**
+
+   Open your browser and navigate to `http://localhost:5173`. You should see the dashboard loading data.
+
+## Backend Integration
+
+This frontend relies on the IOT Shield Backend to function properly. Please ensure the backend server and its MQTT broker are running on port `8000` before starting the frontend so data populates correctly.
